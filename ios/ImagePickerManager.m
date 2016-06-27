@@ -6,6 +6,7 @@
 
 @interface ImagePickerManager ()
 
+@property (nonatomic, strong) UIPopoverController *popover;
 @property (nonatomic, strong) UIAlertController *alertController;
 @property (nonatomic, strong) UIImagePickerController *picker;
 @property (nonatomic, strong) RCTResponseSenderBlock callback;
@@ -247,7 +248,13 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         while (root.presentedViewController != nil) {
           root = root.presentedViewController;
         }
-        [root presentViewController:self.picker animated:YES completion:nil];
+		if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+			[root presentViewController:self.picker animated:YES completion:nil];
+		} else {
+			self.popover = [[UIPopoverController alloc] initWithContentViewController:self.picker];
+			CGRect rect = [[UIScreen mainScreen] bounds];
+			[self.popover presentPopoverFromRect: CGRectMake(rect.size.width / 2 - 100, 60, 200, 60) inView: root.view permittedArrowDirections:UIPopoverArrowDirectionAny animated:YES];
+		}
     });
 }
 
@@ -440,7 +447,12 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         self.callback(@[response]);
     };
     dispatch_async(dispatch_get_main_queue(), ^{
-        [picker dismissViewControllerAnimated:YES completion:dismissCompletionBlock];
+		if(UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+			[picker dismissViewControllerAnimated:YES completion: dismissCompletionBlock];
+		} else {
+			[self.popover dismissPopoverAnimated:YES];
+			dismissCompletionBlock();
+		}
     });
 }
 
