@@ -658,7 +658,7 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
 
     scaledphoto = Bitmap.createBitmap(photo, 0, 0, photo.getWidth(), photo.getHeight(), matrix, true);
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-    scaledphoto.compress(Bitmap.CompressFormat.JPEG, quality, bytes);
+    scaledphoto.compress(getFormat(scaledphoto), quality, bytes);
 
     File f = createNewFile(false);
     FileOutputStream fo;
@@ -681,6 +681,14 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
       photo = null;
     }
     return f;
+  }
+    
+  private Bitmap.CompressFormat getFormat(Bitmap bitmap) {
+    if (bitmap.hasAlpha()) {
+      return Bitmap.CompressFormat.PNG;
+    } else {
+      return Bitmap.CompressFormat.JPEG;
+    }
   }
 
   /**
